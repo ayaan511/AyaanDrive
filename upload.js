@@ -1,31 +1,27 @@
-import { GITHUB_USERNAME, REPO_NAME, GITHUB_TOKEN } from "./config.js";
+const GLITCH_API_URL = "https://ayaandrive-backend.glitch.me/upload";
 
 async function uploadFile(file) {
     const reader = new FileReader();
 
     reader.onload = async function (event) {
-        const content = btoa(event.target.result); // Encode to base64
+        const content = btoa(event.target.result); // Convert to Base64
 
-        const filePath = `files/${file.name}`;
-        const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contents/${filePath}`;
-
-        const response = await fetch(url, {
-            method: "PUT",
+        const response = await fetch(GLITCH_API_URL, {
+            method: "POST",
             headers: {
-                "Authorization": `token ${GITHUB_TOKEN}`,
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                message: `Upload ${file.name}`,
+                filename: file.name,
                 content: content
             })
         });
 
         const result = await response.json();
         if (response.ok) {
-            alert(`File uploaded successfully! Download it here: https://raw.githubusercontent.com/${GITHUB_USERNAME}/${REPO_NAME}/main/${filePath}`);
+            alert(`File uploaded successfully! Download it here: ${result.fileUrl}`);
         } else {
-            alert(`Upload failed: ${result.message}`);
+            alert(`Upload failed: ${result.error}`);
         }
     };
 
